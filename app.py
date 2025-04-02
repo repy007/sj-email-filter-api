@@ -1,15 +1,22 @@
 from flask import Flask, request, jsonify
 import joblib
-
-app = Flask(__name__)
+import os
 
 # Načítaj model
 model = joblib.load("email_filter_model.pkl")
+
+# Inicializuj Flask aplikáciu
+app = Flask(__name__)
+
+@app.route("/", methods=["GET"])
+def root():
+    return "Email filter API is running 🚀"
 
 @app.route("/predict", methods=["POST"])
 def predict():
     data = request.get_json()
     text = data.get("text", "")
+    
     if not text:
         return jsonify({"error": "No text provided"}), 400
 
@@ -21,9 +28,6 @@ def predict():
     }
     return jsonify(response)
 
-@app.route("/", methods=["GET"])
-def root():
-    return "Email filter API is running 🚀"
-
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
